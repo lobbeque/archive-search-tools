@@ -10,8 +10,9 @@ publishMavenStyle := true
 
 autoScalaLibrary := false
 
-mainClass in Compile := Some("qlobbe.ArchiveReader")
+mainClass in Compile := Some("qlobbe.ClusterParallelExpandComponent")
 
 libraryDependencies ++= Seq(
-   "org.apache.solr" % "solr-core" % "5.4.1"
+   	"joda-time" % "joda-time" % "2.9.2",
+   	"org.apache.solr" % "solr-core" % "5.4.1"
 )
