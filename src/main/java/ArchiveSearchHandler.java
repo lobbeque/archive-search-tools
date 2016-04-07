@@ -74,23 +74,12 @@ public class ArchiveSearchHandler extends RequestHandlerBase {
              * Add specifique params for timePicker component
              */
 
-            if (req.getParams().getBool("timePicker", false) && req.getParams().get("time") != null && req.getParams().get("timeRange") != null) {
+            if (req.getParams().getBool("timePicker", false) && req.getParams().get("time") != null) {
+
 
                 params.add("group","true");
 
-                params.add("group.field","url");
-
-                /*
-                 * we want all urls 
-                 */
-
-                params.add("rows","100000");
-
-                /*
-                 * with max 1000 versions of each url
-                 */
-
-                params.add("group.limit","1000");
+                params.add("group.field","url");                    
 
                 DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 
@@ -98,13 +87,33 @@ public class ArchiveSearchHandler extends RequestHandlerBase {
 
                 Date t = df.parse(req.getParams().get("time"));
 
-                int tRange = req.getParams().getInt("timeRange");
+                if(req.getParams().get("timeMode") == "inf") {
 
-                Date tMax = getDate(t,tRange,'+');
+                    // inferior coherence strategy
+                    
+                    params.add("group.sort","last_modified desc");
 
-                Date tMin = getDate(t,tRange,'-');
+                    params.add("rows","100");
 
-                params.add(CommonParams.FQ, "date:[ " + dfSolr.format(tMin) + " TO " + dfSolr.format(tMax) + " ]");
+                    params.add(CommonParams.FQ, "last_modified:[ * TO " + dfSolr.format(t) + " ]");
+
+                } else if (req.getParams().get("timeRange") != null) {
+
+                    // time range strategy
+                         
+                    params.add("group.limit","1000");
+
+                    params.add("rows","100000");                    
+
+                    int tRange = req.getParams().getInt("timeRange");
+
+                    Date tMax = getDate(t,tRange,'+');
+
+                    Date tMin = getDate(t,tRange,'-');
+
+                    params.add(CommonParams.FQ, "date:[ " + dfSolr.format(tMin) + " TO " + dfSolr.format(tMax) + " ]");
+
+                }
 
             } 
 

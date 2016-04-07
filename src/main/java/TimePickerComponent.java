@@ -72,15 +72,11 @@ public class  TimePickerComponent extends SearchComponent {
 	 *   Distributed case
 	 */
     @Override
-    public void finishStage(ResponseBuilder rb) {
-
-        LOGGER.warn("=======\n Heloo");        
+    public void finishStage(ResponseBuilder rb) {    
 
     	if (rb.req == null || rb.req.getParams() == null || rb.stage != rb.STAGE_GET_FIELDS || !rb.req.getParams().getBool("timePicker", false)) {
             return;
         }
-
-        LOGGER.warn("=======\n Youpi");
 
 		try {
 			select(rb.req,rb.rsp,true);
@@ -100,6 +96,8 @@ public class  TimePickerComponent extends SearchComponent {
              */
 
             // http://localhost:8800/solr/ediasporas_maroco/select?q=*:*&fq=site:yabiladi.com&timePicker=true&time=2011-11-15&timeRange=5
+
+            // http://localhost:8800/solr/ediasporas_maroco/select?q=*:*&fq=site:bladi.net&timePicker=true&time=2011-05-20&timeMode=inf&rows=400
 
             String groupField = req.getParams().get("group.field",null);
 
@@ -135,20 +133,24 @@ public class  TimePickerComponent extends SearchComponent {
 
                 long min = Long.MAX_VALUE;
 
-                for(SolrDocument doc : docs) {
+                if (req.getParams().get("timeMode") != "inf") {
 
-                    Collection<Object> dates = doc.getFieldValues("date");
+                    for(SolrDocument doc : docs) {
 
-                    int docIdx = docs.indexOf(doc);
+                        Collection<Object> dates = doc.getFieldValues("date");
 
-                    for(Object date : dates) {
-                        DateTime d = new DateTime((Date)date);
-                        long diff = Math.abs(time.getMillis() - d.getMillis());
-                        if (diff < min) {
-                            min = diff;
-                            minIdx = docIdx;
-                        }        
+                        int docIdx = docs.indexOf(doc);
+
+                        for(Object date : dates) {
+                            DateTime d = new DateTime((Date)date);
+                            long diff = Math.abs(time.getMillis() - d.getMillis());
+                            if (diff < min) {
+                                min = diff;
+                                minIdx = docIdx;
+                            }        
+                        }
                     }
+
                 }
 
                 response.add(docs.get(minIdx));
