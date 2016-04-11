@@ -133,24 +133,20 @@ public class  TimePickerComponent extends SearchComponent {
 
                 long min = Long.MAX_VALUE;
 
-                if (req.getParams().get("timeMode") != "inf") {
+                for(SolrDocument doc : docs) {
 
-                    for(SolrDocument doc : docs) {
+                    Collection<Object> dates = doc.getFieldValues("date");
 
-                        Collection<Object> dates = doc.getFieldValues("date");
+                    int docIdx = docs.indexOf(doc);
 
-                        int docIdx = docs.indexOf(doc);
-
-                        for(Object date : dates) {
-                            DateTime d = new DateTime((Date)date);
-                            long diff = Math.abs(time.getMillis() - d.getMillis());
-                            if (diff < min) {
-                                min = diff;
-                                minIdx = docIdx;
-                            }        
-                        }
+                    for(Object date : dates) {
+                        DateTime d = new DateTime((Date)date);
+                        long diff = Math.abs(time.getMillis() - d.getMillis());
+                        if (diff < min) {
+                            min = diff;
+                            minIdx = docIdx;
+                        }        
                     }
-
                 }
 
                 response.add(docs.get(minIdx));

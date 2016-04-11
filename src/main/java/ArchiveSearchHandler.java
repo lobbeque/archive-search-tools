@@ -70,52 +70,45 @@ public class ArchiveSearchHandler extends RequestHandlerBase {
 
             ModifiableSolrParams params = new ModifiableSolrParams(req.getParams());
 
+            DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+
+            DateFormat dfSolr = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");            
+
+            /*
+             * Add specifique params for siteLink component
+             */            
+
+            if (req.getParams().getBool("siteLink", true) && req.getParams().get("siteName") != null && req.getParams().get("time") != null) {
+
+                Date t = df.parse(req.getParams().get("time"));                
+                params.add("group","true");
+                params.add("group.field","url");  
+                params.add("group.sort","last_modified desc");                
+                params.add("group.limit","1");
+                params.add("rows","100000");   
+                params.add(CommonParams.FQ, "site:" + (String)req.getParams().get("siteName"));                
+                params.add(CommonParams.FQ, "last_modified:[ * TO " + dfSolr.format(t) + " ]");
+                params.add(CommonParams.FL, "link_diaspora");                                            
+
+            }
+
             /*
              * Add specifique params for timePicker component
              */
 
-            if (req.getParams().getBool("timePicker", false) && req.getParams().get("time") != null) {
-
-
-                params.add("group","true");
-
-                params.add("group.field","url");                    
-
-                DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-
-                DateFormat dfSolr = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-
+            if (req.getParams().getBool("timePicker", false) && req.getParams().get("time") != null && req.getParams().get("timeRange") != null) {
+                   
                 Date t = df.parse(req.getParams().get("time"));
+                int tRange = req.getParams().getInt("timeRange");
+                Date tMax = getDate(t,tRange,'+');
+                Date tMin = getDate(t,tRange,'-');
+                params.add("group","true");
+                params.add("group.field","url"); 
+                params.add("rows","100000");                   
+                params.add("group.limit","1000");                
+                params.add(CommonParams.FQ, "date:[ " + dfSolr.format(tMin) + " TO " + dfSolr.format(tMax) + " ]");
 
-                if(req.getParams().get("timeMode") == "inf") {
-
-                    // inferior coherence strategy
-                    
-                    params.add("group.sort","last_modified desc");
-
-                    params.add("rows","100");
-
-                    params.add(CommonParams.FQ, "last_modified:[ * TO " + dfSolr.format(t) + " ]");
-
-                } else if (req.getParams().get("timeRange") != null) {
-
-                    // time range strategy
-                         
-                    params.add("group.limit","1000");
-
-                    params.add("rows","100000");                    
-
-                    int tRange = req.getParams().getInt("timeRange");
-
-                    Date tMax = getDate(t,tRange,'+');
-
-                    Date tMin = getDate(t,tRange,'-');
-
-                    params.add(CommonParams.FQ, "date:[ " + dfSolr.format(tMin) + " TO " + dfSolr.format(tMax) + " ]");
-
-                }
-
-            } 
+            }
 
             req.setParams(params);           
 
