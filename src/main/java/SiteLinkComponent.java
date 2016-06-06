@@ -104,10 +104,18 @@ public class  SiteLinkComponent extends SearchComponent {
             SimpleOrderedMap response = new SimpleOrderedMap();
             Boolean first = false;
 
-            // init links array with the first doc of the first group if exist
+            response.add("site",req.getParams().get("siteName"));
+            response.add("time",req.getParams().get("time"));
 
-            if (groups.size() == 0)
+            if (groups.size() == 0) {
+                response.add("nb_pages",0);
+                response.add("link_diasporas","");
+                rsp.getValues().setName(groupeIdx,"response");  
+                rsp.getValues().setVal(groupeIdx,response);
                 return;
+            }
+
+            // init links array with the first doc of the first group if exist
 
             int nbLinks = ((String)((SolrDocument)((SolrDocumentList)((NamedList)groups.get(0)).get("doclist")).get(0)).getFieldValue("link_diaspora")).length();
             int[] links = new int[nbLinks]; 
@@ -143,11 +151,8 @@ public class  SiteLinkComponent extends SearchComponent {
                 rst = rst + String.valueOf(link);
             }   
 
-            response.add("site",req.getParams().get("siteName"));
-            response.add("time",req.getParams().get("time"));
             response.add("nb_pages",(Integer)grouped.get("matches"));
             response.add("link_diasporas",rst);
-
             rsp.getValues().setName(groupeIdx,"response");  
             rsp.getValues().setVal(groupeIdx,response);            
 
