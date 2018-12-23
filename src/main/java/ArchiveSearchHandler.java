@@ -72,7 +72,9 @@ public class ArchiveSearchHandler extends RequestHandlerBase {
 
             DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 
-            DateFormat dfSolr = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");            
+            DateFormat dfSolr = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");     
+
+            System.out.println("==== handleRequest");   
 
             /*
              * Add specifique params for siteLink component
@@ -107,6 +109,19 @@ public class ArchiveSearchHandler extends RequestHandlerBase {
                 params.add("rows","100000");                   
                 params.add("group.limit","1000");                
                 params.add(CommonParams.FQ, "date:[ " + dfSolr.format(tMin) + " TO " + dfSolr.format(tMax) + " ]");
+
+            }
+
+            /*
+             * Add specifique params for contextMap
+             */
+
+            if (req.getParams().getBool("contextMap",false)) {
+
+                params.add("fl","first_modified,last_modified,link_out_social,link_out_url,link_out_corpus");
+                params.add("sort","first_modified asc");
+
+                System.out.println("==== add params");
 
             }
 

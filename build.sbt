@@ -1,3 +1,7 @@
+import AssemblyKeys._
+
+assemblySettings
+
 name := "archive-search-tools"
 
 organization := "qlobbe"
